@@ -1,6 +1,6 @@
 import {Request , Response} from "express" ; 
 import axios from "axios" ; 
-import cheerio from "cheerio" ; 
+import * as cheerio from "cheerio" ; 
 import {google} from "googleapis" ; 
 import {db} from "../server" ; 
 import { SEOAnalysisResult } from "../models/analysis";
@@ -14,15 +14,23 @@ const pagespeed = google.pagespeedonline("v5") ;
 
 const PAGE_SPEED_API_KEY = process.env.PAGE_SPEED_API_KEY ; 
 
+
+
 export const analyze = async (req : Request , res : Response) =>{
     try{ 
         const {url , keyword} = req.body ; 
+        console.log(keyword) ; 
         const userId = (req as any).userId ; 
 
         const startTime = Date.now() ;
         const response = await axios.get(url) ;
-        const html = response.data ; 
-        const $ = cheerio.load(html as any) ;
+
+        if (!response || !response.data) {
+          throw new Error("Empty response received from the requested URL");
+        }
+
+        const html = response.data as string ; 
+        const $ = cheerio.load(html) ;
         const endTime = Date.now() ;
 
         // --- SEO Analysis --- 
@@ -47,10 +55,9 @@ export const analyze = async (req : Request , res : Response) =>{
         }).length;
 
         const externalLinks = allLinks.length - internalLinks;
-        
-        
-        // performance Analysis 
 
+        // performance Analysis 
+        console.log(PAGE_SPEED_API_KEY) ; 
         const pagesspeedRes = await pagespeed.pagespeedapi.runpagespeed({
             url,
             key : PAGE_SPEED_API_KEY, 
@@ -122,6 +129,7 @@ export const analyze = async (req : Request , res : Response) =>{
           res.status(200).send(result) ; 
         } 
         catch (error) {
+            console.log(error) ;
             res.status(500).json({ error: "Analysis failed" });
         }
 }
