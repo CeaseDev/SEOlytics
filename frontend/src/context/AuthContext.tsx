@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const idToken = await userCredential.user.getIdToken();
-        console.log(idToken);
 
         // Send the ID Token to the backend for verification
         const response = await axios.post("http://localhost:8080/api/auth/login", { idToken });

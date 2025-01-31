@@ -1,14 +1,34 @@
 import type React from "react"
-import { useState } from "react"
+import {useState } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
+import Navbar from "../components/Navbar" ; 
 
-const AnalyzePage: React.FC = () => {
+interface AnalysisResult {
+  id: string
+  url: string
+  timeStamp: {
+    _seconds: number
+    _nanoseconds: number
+  }
+  seoScore: number
+  performanceScore: number
+  overallScore: number
+}
+
+
+interface AnalyzePageProps {
+  history: AnalysisResult[];
+}
+
+const AnalyzePage: React.FC<AnalyzePageProps> = ({history} ) => {
   const [url, setUrl] = useState("")
   const [keyword, setKeyword] = useState("")
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const navigate = useNavigate()
+  const [error, setError] = useState("") ; 
+  const navigate = useNavigate(); 
+
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,7 +58,8 @@ const AnalyzePage: React.FC = () => {
     }
   }
 
-  return (
+  return (<>
+    <Navbar previousResults={history} ></Navbar>
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
         <h2 className="text-3xl font-bold mb-6 text-blue-600">Analyze Your Website</h2>
@@ -82,6 +103,7 @@ const AnalyzePage: React.FC = () => {
         </form>
       </div>
     </div>
+    </>
   )
 }
 

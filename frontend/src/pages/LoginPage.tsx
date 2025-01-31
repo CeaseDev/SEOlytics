@@ -15,6 +15,8 @@ export default function Login() {
   
   const verifyToken = async () =>{
     const token = localStorage.getItem("token") as string  ; 
+
+    if(!token) return ; 
     const response = await axios.post(
       "http://localhost:8080/api/auth/verifytoken",
       { },
@@ -36,7 +38,7 @@ export default function Login() {
 
   useEffect(() => {
    verifyToken();
-  } ,[] ) ; 
+  } ) ; 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -6,7 +6,7 @@ import {db} from "../server" ;
 import { AnalysisHistory, SEOAnalysisResult } from "../models/analysis";
 import { calculateKeywordDensity } from "../utils/keywordDensity";
 import internal from "stream";
-import { timeStamp } from "console";
+import { time, timeStamp } from "console";
 import { calculateSEOScore , calculatePerformanceScore } from "../utils/calculateScore";
 import { messaging } from "firebase-admin";
 
@@ -20,7 +20,7 @@ const PAGE_SPEED_API_KEY = process.env.PAGE_SPEED_API_KEY ;
 export const analyze = async (req : Request , res : Response) =>{
     try{ 
         const {url , keyword} = req.body ; 
-        console.log(keyword) ; 
+
         const userId = (req as any).userId ; 
 
         const startTime = Date.now() ;
@@ -58,7 +58,7 @@ export const analyze = async (req : Request , res : Response) =>{
         const externalLinks = allLinks.length - internalLinks;
 
         // performance Analysis 
-        console.log(PAGE_SPEED_API_KEY) ; 
+  
         const pagesspeedRes = await pagespeed.pagespeedapi.runpagespeed({
             url,
             key : PAGE_SPEED_API_KEY, 
@@ -140,7 +140,6 @@ export const getAnalysisHistory = async (req : Request, res : any) => {
     try{ 
 
       const userId = (req as any).userId;
-      console.log(userId) ; 
       const snapshot = await db.collection("analyses")
                                 .where('userId' ,'==' , userId )
                                 .orderBy('timeStamp', 'asc').get() ; 
@@ -154,8 +153,6 @@ export const getAnalysisHistory = async (req : Request, res : any) => {
         overallScore : doc.data().result.overallScore
       })) ;
 
-      console.log(history) ;
-
       res.status(200).json(history) ; 
     }
     catch(err){
@@ -163,4 +160,33 @@ export const getAnalysisHistory = async (req : Request, res : any) => {
       res.status(500).json({message : 'failed to get analysis history'}) ; 
     }
 } ; 
+
+export const getAnalysisHistorybyId = async (req: Request , res : any) =>{
+  try {
+    const userId = (req as any).userId; 
+    const analysisId = req.params.id ; 
+
+    const doc = await db.collection('analyses').doc(analysisId).get() ; 
+    
+    console.log(doc.data()); 
+
+    if(!doc.exists){
+      return res.status(404).json({message: 'Ananlysis not Found'}) ; 
+    }
+
+    const analysis = doc.data() as any; 
+
+    console.log(analysis) ; 
+    res.status(200).json({
+      uid : analysis.uid,
+      url : analysis.url, 
+      timeStamp : analysis.timeStamp, 
+      ...analysis.result
+    });
+  }
+  catch(err) { 
+    console.log(err) ; 
+    res.status(500).json({message : 'failed to get analysis'})
+  }
+}
 
