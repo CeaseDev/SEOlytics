@@ -1,6 +1,7 @@
 import type React from "react"
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
+import dashboardImg from "../assets/dashboard-mockup.png" ;
 
 const LandingPage: React.FC = () => {
   return (
@@ -58,9 +59,9 @@ const LandingPage: React.FC = () => {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg transform rotate-3"></div>
               <img
-                src="/dashboard-mockup.png"
+                src={dashboardImg}
                 alt="SEOlytics Dashboard"
-                className="relative z-10 rounded-lg shadow-2xl"
+                className="relative z-10 rounded-lg shadow-2xl opacity-85"
               />
             </div>
           </motion.div>
