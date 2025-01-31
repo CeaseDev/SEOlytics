@@ -13,6 +13,7 @@ export const authenticate = (
 
   try {
     const decoded = verifyToken(token) as { userId: string };
+    console.log(decoded) ;
     (req as any).userId = decoded.userId;
     next();
   } catch (error) {

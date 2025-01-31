@@ -43,3 +43,11 @@ export interface SEOAnalysisResult {
     performanceScore: number;
     overallScore: number;
   }
+
+  export interface AnalysisHistory {
+    id : string ; 
+    userId : string ; 
+    url : string ; 
+    timeStamp : Date ; 
+    result : SEOAnalysisResult ;
+  }

@@ -3,11 +3,12 @@ import axios from "axios" ;
 import * as cheerio from "cheerio" ; 
 import {google} from "googleapis" ; 
 import {db} from "../server" ; 
-import { SEOAnalysisResult } from "../models/analysis";
+import { AnalysisHistory, SEOAnalysisResult } from "../models/analysis";
 import { calculateKeywordDensity } from "../utils/keywordDensity";
 import internal from "stream";
 import { timeStamp } from "console";
 import { calculateSEOScore , calculatePerformanceScore } from "../utils/calculateScore";
+import { messaging } from "firebase-admin";
 
 
 const pagespeed = google.pagespeedonline("v5") ;
@@ -133,4 +134,33 @@ export const analyze = async (req : Request , res : Response) =>{
             res.status(500).json({ error: "Analysis failed" });
         }
 }
+
+
+export const getAnalysisHistory = async (req : Request, res : any) => {
+    try{ 
+
+      const userId = (req as any).userId;
+      console.log(userId) ; 
+      const snapshot = await db.collection("analyses")
+                                .where('userId' ,'==' , userId )
+                                .orderBy('timeStamp', 'asc').get() ; 
+
+      const history = snapshot.docs.map(doc => ({
+        id: doc.id,
+        url : doc.data().url ,
+        timeStamp : doc.data().timeStamp, 
+        seoScore : doc.data().result.seoScore,
+        performanceScore : doc.data().result.performanceScore , 
+        overallScore : doc.data().result.overallScore
+      })) ;
+
+      console.log(history) ;
+
+      res.status(200).json(history) ; 
+    }
+    catch(err){
+      console.log(err) ; 
+      res.status(500).json({message : 'failed to get analysis history'}) ; 
+    }
+} ; 
 

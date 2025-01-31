@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import axios from "axios";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,7 +11,32 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const  {login } = useAuth() ; 
+  const  {login } = useAuth() ;
+  
+  const verifyToken = async () =>{
+    const token = localStorage.getItem("token") as string  ; 
+    const response = await axios.post(
+      "http://localhost:8080/api/auth/verifytoken",
+      { },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+      );
+
+      if(response.status === 200  && response.data.valid){
+        const newToken = response.data.token ; 
+        localStorage.setItem("token", newToken);
+        navigate("/analyze") ; 
+        console.log(response.data) ;
+      }
+  }
+
+  useEffect(() => {
+   verifyToken();
+  } ,[] ) ; 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

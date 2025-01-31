@@ -2,7 +2,8 @@ import  { Request, Response } from "express" ;
 import { User }  from "../models/user"
 import {auth , db} from "../server" ;
 
-import { generateToken } from "../utils/jwtUtils" 
+import { generateToken , verifyToken} from "../utils/jwtUtils" 
+import { messaging } from "firebase-admin";
 
 export const register = async (req : Request, res : any) => {
     try{
@@ -61,3 +62,35 @@ export const login= async (req: Request, res: any) => {
         return res.status(401).json({ message: "Invalid credentials", error: error.message });
     }
 };
+
+export const verify = async (req: Request , res : any ) =>{
+    try {
+        const token = req.headers.authorization?.split(" ")[1] ; 
+
+        if(!token){
+            return res.status(401).json({valid : false ,  message: "No Token found" }) ; 
+        }
+
+        const decoded = verifyToken(token) as {userId : string}; 
+
+        const newToken = generateToken(decoded.userId) ;
+
+        const user = await auth.getUser(decoded.userId) ;
+
+        res.status(200).json({
+            valid : true , 
+            user : {
+                uid : user.uid , 
+                email: user.email , 
+                emailVerified : user.emailVerified
+            }, 
+            token : newToken 
+        }) ; 
+
+    }catch(error){
+        res.status(401).json({
+            valid:false , 
+            message : "Invalid or Expired token"
+        })
+    }
+}
